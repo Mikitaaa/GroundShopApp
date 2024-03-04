@@ -20,7 +20,7 @@ public class NotificationsViewModel extends ViewModel {
     public NotificationsViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("This is notifications fragment");
-        sendGetRequest("http://192.168.0.110:3000/api/route");
+        sendGetRequest("https://groundshop.vercel.app/api/route");
     }
 
     public LiveData<String> getText() {
