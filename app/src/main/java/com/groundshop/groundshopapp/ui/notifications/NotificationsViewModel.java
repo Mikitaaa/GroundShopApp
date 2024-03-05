@@ -4,80 +4,44 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import android.util.Base64;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import android.util.Log;
+import com.groundshop.groundshopapp.ui.parser.HttpRequestHelper;
+import com.groundshop.groundshopapp.ui.parser.Order;
+import com.groundshop.groundshopapp.ui.parser.OrderParser;
+import java.util.List;
+import android.os.AsyncTask;
 
 public class NotificationsViewModel extends ViewModel {
 
     private final MutableLiveData<String> mText;
+    //private final MutableLiveData<List<Order>> mOrders;
 
     public NotificationsViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("This is notifications fragment");
-        sendGetRequest("https://groundshop.vercel.app/api/route");
+        new HttpRequestTask().execute("https://groundshop.vercel.app/api/route");
+       // mOrders = new MutableLiveData<>();
+       // mOrders.setValue(new OrderParser().parseOrders(response));
     }
 
     public LiveData<String> getText() {
         return mText;
     }
 
-    private void sendGetRequest(final String endpoint) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpURLConnection connection = null;
-                BufferedReader reader = null;
+    //public LiveData<List<Order>> getOrders() { return mOrders; }
 
-                try {
-                    URL url = new URL(endpoint);
-                    connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("GET");
+    private class HttpRequestTask extends AsyncTask<String, Void, String> {
 
-                    // Adding headers
-                    connection.setRequestProperty("Content-Type", "application/json");
-                    // Add Basic authentication header
-                    String auth = "GroundShopMobileApp" + ":" + "7n9w!P.=E4Hh.)-N4^([g29zs,VZ&!";
-                    String encodedAuth = Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);
-                    connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
-
-                    InputStream inputStream = connection.getInputStream();
-                    reader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
-                    }
-
-                    // Log the response
-                    Log.d("HTTP_RESPONSE", "Response: " + response.toString());
-
-                    // Update mText with the response
-                    mText.postValue(response.toString());
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e("HTTP_REQUEST", "Error occurred during HTTP request: " + e.getMessage());
-                } finally {
-                    if (connection != null) {
-                        connection.disconnect();
-                    }
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Log.e("HTTP_REQUEST", "Error occurred while closing reader: " + e.getMessage());
-                        }
-                    }
-                }
+        @Override
+        protected String doInBackground(String... urls) {
+            if (urls.length < 1 || urls[0] == null) {
+                return null;
             }
-        }).start();
-    }
+            return HttpRequestHelper.sendGetRequest(urls[0]);
+        }
 
+        @Override
+        protected void onPostExecute(String result) {
+            mText.setValue(result);
+        }
+    }
 }
