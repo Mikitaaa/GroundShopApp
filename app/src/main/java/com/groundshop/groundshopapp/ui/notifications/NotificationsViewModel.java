@@ -13,21 +13,21 @@ import android.os.AsyncTask;
 public class NotificationsViewModel extends ViewModel {
 
     private final MutableLiveData<String> mText;
-    //private final MutableLiveData<List<Order>> mOrders;
+    private final MutableLiveData<List<Order>> mOrders;
 
     public NotificationsViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("This is notifications fragment");
+        mOrders = new MutableLiveData<>();
+
         new HttpRequestTask().execute("https://groundshop.vercel.app/api/route");
-       // mOrders = new MutableLiveData<>();
-       // mOrders.setValue(new OrderParser().parseOrders(response));
     }
 
     public LiveData<String> getText() {
         return mText;
     }
 
-    //public LiveData<List<Order>> getOrders() { return mOrders; }
+    public LiveData<List<Order>> getOrders() { return mOrders; }
 
     private class HttpRequestTask extends AsyncTask<String, Void, String> {
 
@@ -41,7 +41,13 @@ public class NotificationsViewModel extends ViewModel {
 
         @Override
         protected void onPostExecute(String result) {
-            mText.setValue(result);
+            if (result != null) {
+                List<Order> parsedOrders = new OrderParser().parseOrders(result);
+                mOrders.setValue(parsedOrders);
+            }
+            else {
+                // Handle null result here
+            }
         }
     }
 }
