@@ -14,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.groundshop.groundshopapp.databinding.FragmentNotificationsBinding;
 import com.groundshop.groundshopapp.ui.parser.Order;
 import com.groundshop.groundshopapp.R;
+import com.groundshop.groundshopapp.ui.orderitem.OrderItemView;
+
 
 
 import java.util.List;
@@ -37,21 +39,21 @@ public class NotificationsFragment extends Fragment {
         // Получение контейнера LinearLayout из макета
         LinearLayout containerLayout = root.findViewById(R.id.container);
 
-        // Наблюдение за изменениями в списке заказов и обновление интерфейса
         notificationsViewModel.getOrders().observe(getViewLifecycleOwner(), orders -> {
             if (orders != null && !orders.isEmpty()) {
-                // Очистка контейнера перед добавлением новых TextView
                 containerLayout.removeAllViews();
 
-                // Добавление TextView для каждого заказа
                 for (Order order : orders) {
-                    TextView orderTextView = new TextView(requireContext());
-                    // Формирование текста для TextView
+                    OrderItemView orderItemView = new OrderItemView(requireContext());
                     String orderDetails = "Order ID: " + order.getId() + "\n" +
                             "Name: " + order.getName() + "\n" +
                             "Phone: " + order.getPhone() + "\n";
-                    orderTextView.setText(orderDetails);
-                    containerLayout.addView(orderTextView);
+                    orderItemView.setOrderDetails(orderDetails);
+                    orderItemView.setOnDeleteClickListener(v -> {
+                        // Обработка нажатия на кнопку удаления заказа
+                        containerLayout.removeView(orderItemView);
+                    });
+                    containerLayout.addView(orderItemView);
                 }
             }
         });
