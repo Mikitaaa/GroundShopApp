@@ -16,10 +16,6 @@ import com.groundshop.groundshopapp.ui.parser.Order;
 import com.groundshop.groundshopapp.R;
 import com.groundshop.groundshopapp.ui.orderitem.OrderItemView;
 
-
-
-import java.util.List;
-
 public class NotificationsFragment extends Fragment {
 
     private FragmentNotificationsBinding binding;
@@ -33,10 +29,6 @@ public class NotificationsFragment extends Fragment {
         binding = FragmentNotificationsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textNotifications;
-        notificationsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-
-        // Получение контейнера LinearLayout из макета
         LinearLayout containerLayout = root.findViewById(R.id.container);
 
         notificationsViewModel.getOrders().observe(getViewLifecycleOwner(), orders -> {
@@ -45,9 +37,9 @@ public class NotificationsFragment extends Fragment {
 
                 for (Order order : orders) {
                     OrderItemView orderItemView = new OrderItemView(requireContext());
-                    String orderDetails = "Order ID: " + order.getId() + "\n" +
-                            "Name: " + order.getName() + "\n" +
-                            "Phone: " + order.getPhone() + "\n";
+                    String orderDetails = "Имя: " + order.getName() + "\n" +
+                            "Телефон: " + order.getPhone() + "\n" +
+                            "Комментарий: " + order.getComment() + "\n";
                     orderItemView.setOrderDetails(orderDetails);
                     orderItemView.setOnDeleteClickListener(v -> {
                         // Обработка нажатия на кнопку удаления заказа
