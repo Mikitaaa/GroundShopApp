@@ -37,10 +37,11 @@ public class NotificationsFragment extends Fragment {
 
                 for (Order order : orders) {
                     OrderItemView orderItemView = new OrderItemView(requireContext());
-                    String orderDetails = "Имя: " + order.getName() + "\n" +
-                            "Телефон: " + order.getPhone() + "\n" +
-                            "Комментарий: " + order.getComment() + "\n";
-                    orderItemView.setOrderDetails(orderDetails);
+
+                    orderItemView.setOrderName(order.getName());
+                    orderItemView.setOrderPhone(order.getPhone());
+                    orderItemView.setOrderDetails(order.getComment());
+
                     orderItemView.setOnDeleteClickListener(v -> {
                         // Обработка нажатия на кнопку удаления заказа
                         containerLayout.removeView(orderItemView);

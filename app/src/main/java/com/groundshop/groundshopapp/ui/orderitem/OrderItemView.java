@@ -10,6 +10,8 @@ import com.groundshop.groundshopapp.R;
 
 public class OrderItemView extends LinearLayout {
     private TextView orderDetailsTextView;
+    private TextView orderPhoneTextView;
+    private TextView orderNameTextView;
     private Button deleteButton;
 
     public OrderItemView(Context context) {
@@ -30,12 +32,20 @@ public class OrderItemView extends LinearLayout {
     private void init(Context context) {
         inflate(context, R.layout.order_item_view, this);
 
-        orderDetailsTextView = findViewById(R.id.order_details_text_view);
+        orderDetailsTextView = findViewById(R.id.input_details_text_view);
+        orderPhoneTextView = findViewById(R.id.input_phone_text_view);
+        orderNameTextView = findViewById(R.id.input_name_text_view);
         deleteButton = findViewById(R.id.delete_button);
     }
 
     public void setOrderDetails(String details) {
         orderDetailsTextView.setText(details);
+    }
+    public void setOrderName(String name) {
+        orderNameTextView.setText(name);
+    }
+    public void setOrderPhone(String phone) {
+        orderPhoneTextView.setText(phone);
     }
 
     public void setOnDeleteClickListener(View.OnClickListener listener) {

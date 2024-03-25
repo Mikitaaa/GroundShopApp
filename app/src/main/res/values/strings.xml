@@ -4,4 +4,11 @@
     <string name="title_notifications">Заказы</string>
     <string name="delete_button">Удалить</string>
     <string name="call_button">Перезвонить</string>
+
+    <string name="call_back_text_string">Перезвонить</string>
+    <string name="delete_text_string">Удалить</string>
+
+    <string name="comment_string"><u>Комментарий:</u></string>
+    <string name="phonenumber_string"><u>Телефон:</u></string>
+    <string name="name_string"><u>Имя:</u></string>
 </resources>
