@@ -103,7 +103,7 @@
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <ScrollView
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_below="@id/order_details_layout"
@@ -121,8 +121,7 @@
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:scrollbars="vertical" />
-            </ScrollView>
-
+            </androidx.core.widget.NestedScrollView>
 
         </LinearLayout>
 
