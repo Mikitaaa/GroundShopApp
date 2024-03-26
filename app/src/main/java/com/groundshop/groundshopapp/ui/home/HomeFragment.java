@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,10 +16,14 @@ import androidx.lifecycle.ViewModelProvider;
 import com.groundshop.groundshopapp.databinding.FragmentHomeBinding;
 import com.groundshop.groundshopapp.R;
 
+import android.app.AlertDialog;
+import android.widget.EditText;
+import android.widget.Button;
+
+
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
-    // Создание массива для названий товаров
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -43,10 +48,52 @@ public class HomeFragment extends Fragment {
             ImageView productPhotoView = childView.findViewById(R.id.photo1);
             int resId = getResources().getIdentifier("photo" + (i+1), "drawable", requireContext().getPackageName());
             productPhotoView.setImageResource(resId);
+
+            final int index = i;
+            productPriceView.setOnClickListener(v -> {
+                String productName = productNames[index % productCount];
+                String productPrice = productPrices[index % productCount];
+                showProductDetailsDialog(productName, productPrice);
+            });
         }
 
         return root;
     }
+
+    private void showProductDetailsDialog(String productName, String oldPrice) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View customLayout = getLayoutInflater().inflate(R.layout.change_price_window, null);
+        builder.setView(customLayout);
+
+        TextView dialogTitle = customLayout.findViewById(R.id.changePriceTitle);
+        EditText dialogInput = customLayout.findViewById(R.id.changePriceInput);
+        Button closeButton = customLayout.findViewById(R.id.closeButton);
+        Button setButton = customLayout.findViewById(R.id.setButton);
+
+        dialogInput.setText(oldPrice);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(R.drawable.change_price_background);
+        }
+
+        // TODO: POST Request
+        setButton.setOnClickListener(v -> {
+
+            dialog.dismiss();
+        });
+
+        closeButton.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
+
+    }
+
+
+
 
     @Override
     public void onDestroyView() {
@@ -54,12 +101,13 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
-    private String[] productNames = {
+    private final String[] productNames = {
             "Голубика", "Универсальный", "Кислый", "Нейтрал", "Компост", "Высокие Грядки"
     };
 
-    private String[] productPrices = {
+    // TODO: DATABASE
+    private final String[] productPrices = {
             "$10", "$20", "$30", "$40", "$50", "$60",
     };
-    private int productCount = 6;
+    private final int productCount = 6;
 }

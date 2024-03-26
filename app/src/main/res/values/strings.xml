@@ -11,4 +11,8 @@
     <string name="comment_string"><u>Комментарий:</u></string>
     <string name="phonenumber_string"><u>Телефон:</u></string>
     <string name="name_string"><u>Имя:</u></string>
+    <string name="change_price_title">Сменить Цену</string>
+    <string name="change_price_default_input">Введите цену</string>
+    <string name="change_price_set_button">Установить</string>
+    <string name="change_price_close_button">Закрыть</string>
 </resources>

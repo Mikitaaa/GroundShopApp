@@ -14,12 +14,12 @@
         android:padding="16dp">
 
         <View
-            android:id="@+id/_bg__orderfield"
+            android:id="@+id/_bg_orderfield"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="0dp"
             android:layout_marginTop="0dp"
-            android:background="@drawable/_bg__orderfield_shape" />
+            android:background="@drawable/_bg_orderfield_shape" />
 
         <LinearLayout
             android:id="@+id/order_name_layout"
@@ -129,7 +129,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/_bg__orderfield"
+            android:layout_alignBottom="@+id/_bg_orderfield"
             android:layout_marginBottom="20dp"
             android:orientation="horizontal">
 
@@ -139,10 +139,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_weight="2"
-                android:background="@drawable/_bg__deletebutton_ek1_shape"
+                android:background="@drawable/_bg_deletebutton_ek1_shape"
                 android:text="@string/delete_button"
                 android:textSize="12sp"
-                app:backgroundTint="@null" />
+                app:backgroundTint="@null"
+                tools:ignore="VisualLintButtonSize" />
 
             <Space
                 android:layout_width="wrap_content"
@@ -155,10 +156,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="2.5"
-                android:background="@drawable/_bg__callbackbutton_ek1_shape"
+                android:background="@drawable/_bg_callbackbutton_ek1_shape"
                 android:text="@string/call_button"
                 android:textSize="12sp"
-                app:backgroundTint="@null" />
+                app:backgroundTint="@null"
+                tools:ignore="VisualLintButtonSize" />
         </LinearLayout>
 
     </RelativeLayout>

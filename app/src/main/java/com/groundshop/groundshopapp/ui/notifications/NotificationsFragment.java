@@ -42,7 +42,6 @@ public class NotificationsFragment extends Fragment {
                     orderItemView.setOrderDetails(order.getComment());
 
                     orderItemView.setOnDeleteClickListener(v -> {
-                        // Обработка нажатия на кнопку удаления заказа
                         containerLayout.removeView(orderItemView);
                     });
                     containerLayout.addView(orderItemView);
