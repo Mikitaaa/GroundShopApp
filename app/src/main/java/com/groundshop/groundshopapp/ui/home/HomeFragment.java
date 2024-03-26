@@ -55,7 +55,7 @@ public class HomeFragment extends Fragment {
     }
 
     private String[] productNames = {
-            "Голубика", "Универсальный", "Кислый", "Нейтрализированный", "Компост", "Высокие Грядки"
+            "Голубика", "Универсальный", "Кислый", "Нейтрал", "Компост", "Высокие Грядки"
     };
 
     private String[] productPrices = {

@@ -15,31 +15,31 @@
             android:id="@+id/_bg__product1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="0dp"
             android:background="@drawable/_bg__product_shape" />
 
-
         <TextView
-            android:layout_below="@+id/photo1"
             android:id="@+id/price1"
             android:layout_width="wrap_content"
             android:layout_height="25dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginEnd="10dp"
             android:clickable="true"
             android:focusable="true"
             android:text=""
             android:textColor="@color/price12_color"
             android:textSize="15sp"
-            android:textStyle="bold"
-            android:layout_alignParentEnd="true"
-            />
+            android:textStyle="bold" />
 
         <ImageView
-            android:layout_below="@+id/name1"
             android:id="@+id/photo1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/name1"
+            android:layout_alignParentBottom="true"
             android:layout_marginTop="5dp"
+            android:layout_marginBottom="34dp"
             android:contentDescription="photo1"
             android:src="@drawable/photo1" />
 
@@ -47,15 +47,18 @@
             android:id="@+id/name1"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_alignParentTop="true"
-            android:layout_gravity="center_horizontal|center"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="11dp"
+            android:layout_gravity="center_horizontal"
             android:gravity="center"
             android:text=""
             android:textColor="@color/price12_color"
             android:textSize="13sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="9dp"/>
 
     </RelativeLayout>
 
