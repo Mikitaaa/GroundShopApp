@@ -18,7 +18,7 @@ public class HttpRequestHelper {
         BufferedReader reader = null;
 
         try {
-            FileReader fileReader = new FileReader("app/src/main/res/values/auth.txt");
+            FileReader fileReader = new FileReader("app/src/main/res/raw/auth.txt");
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String auth = bufferedReader.readLine();
