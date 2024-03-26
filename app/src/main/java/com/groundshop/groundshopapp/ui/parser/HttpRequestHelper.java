@@ -9,21 +9,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.io.FileReader;
 
 public class HttpRequestHelper {
-    public static String sendGetRequest(final String endpoint) {
+
+    public static String sendGetRequest(final String endpoint, String auth) {
         StringBuilder response = new StringBuilder();
         HttpURLConnection connection = null;
         BufferedReader reader = null;
 
         try {
-            FileReader fileReader = new FileReader("app/src/main/res/raw/auth.txt");
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-            String auth = bufferedReader.readLine();
-
-            bufferedReader.close();
 
             URL url = new URL(endpoint);
             connection = (HttpURLConnection) url.openConnection();
@@ -32,6 +26,7 @@ public class HttpRequestHelper {
             // Adding headers
             connection.setRequestProperty("Content-Type", "application/json");
             // Add Basic authentication header
+
             String encodedAuth = Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);
             connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
 
