@@ -12,19 +12,12 @@ import android.os.AsyncTask;
 
 public class NotificationsViewModel extends ViewModel {
 
-    private final MutableLiveData<String> mText;
     private final MutableLiveData<List<Order>> mOrders;
 
     public NotificationsViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is notifications fragment");
         mOrders = new MutableLiveData<>();
 
         new HttpRequestTask().execute("https://groundshop.vercel.app/api/route");
-    }
-
-    public LiveData<String> getText() {
-        return mText;
     }
 
     public LiveData<List<Order>> getOrders() { return mOrders; }
