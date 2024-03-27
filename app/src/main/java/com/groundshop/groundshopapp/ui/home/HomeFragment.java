@@ -1,6 +1,8 @@
 package com.groundshop.groundshopapp.ui.home;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.groundshop.groundshopapp.databinding.FragmentHomeBinding;
 import com.groundshop.groundshopapp.R;
+import com.groundshop.groundshopapp.ui.database.ProductDB;
 
 import android.app.AlertDialog;
 import android.widget.EditText;
@@ -24,6 +27,7 @@ import android.widget.Button;
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
+    private ProductDB dataBase;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -35,32 +39,35 @@ public class HomeFragment extends Fragment {
 
         GridLayout gridLayout = root.findViewById(R.id.gridLayout);
 
+        Context context = getContext();
+        dataBase = new ProductDB(context);
         int childCount = gridLayout.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View childView = gridLayout.getChildAt(i);
+            final int index = i+1;
+
+            String productName = dataBase.getProductNameById(index);
+            String productPrice = dataBase.getProductPriceById(index);
 
             TextView productNameView = childView.findViewById(R.id.name1);
-            productNameView.setText(productNames[i % productCount]);
+            productNameView.setText(productName);
 
             TextView productPriceView = childView.findViewById(R.id.price1);
-            productPriceView.setText(productPrices[i % productCount]);
+            productPriceView.setText(productPrice);
 
             ImageView productPhotoView = childView.findViewById(R.id.photo1);
-            int resId = getResources().getIdentifier("photo" + (i+1), "drawable", requireContext().getPackageName());
+            int resId = getResources().getIdentifier("photo" + (index), "drawable", requireContext().getPackageName());
             productPhotoView.setImageResource(resId);
 
-            final int index = i;
             productPriceView.setOnClickListener(v -> {
-                String productName = productNames[index % productCount];
-                String productPrice = productPrices[index % productCount];
-                showProductDetailsDialog(productName, productPrice);
+                showProductDetailsDialog(index, productName, dataBase.getProductPriceById(index), productPriceView);
             });
         }
 
         return root;
     }
 
-    private void showProductDetailsDialog(String productName, String oldPrice) {
+    private void showProductDetailsDialog(int index, String productName, String oldPrice, TextView productPriceView) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View customLayout = getLayoutInflater().inflate(R.layout.change_price_window, null);
         builder.setView(customLayout);
@@ -70,9 +77,13 @@ public class HomeFragment extends Fragment {
         Button closeButton = customLayout.findViewById(R.id.closeButton);
         Button setButton = customLayout.findViewById(R.id.setButton);
 
+        String volume = dataBase.getProductVolumeById(index);
+
         dialogInput.setText(oldPrice);
+        dialogTitle.setText(productName+" ("+volume+")");
 
         AlertDialog dialog = builder.create();
+
         dialog.show();
 
         Window window = dialog.getWindow();
@@ -82,6 +93,15 @@ public class HomeFragment extends Fragment {
 
         // TODO: POST Request
         setButton.setOnClickListener(v -> {
+            String newPrice = dialogInput.getText().toString();
+
+            if (!newPrice.isEmpty()) {
+                dataBase.updateProductPrice(index, newPrice);
+                Log.d("SetButton", "Price updated for product ID: " + index + ", New Price: " + newPrice);
+                productPriceView.setText(newPrice);
+            } else {
+                Log.d("SetButton", "New price is empty");
+            }
 
             dialog.dismiss();
         });
@@ -92,22 +112,9 @@ public class HomeFragment extends Fragment {
 
     }
 
-
-
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
-
-    private final String[] productNames = {
-            "Голубика", "Универсальный", "Кислый", "Нейтрал", "Компост", "Высокие Грядки"
-    };
-
-    // TODO: DATABASE
-    private final String[] productPrices = {
-            "$10", "$20", "$30", "$40", "$50", "$60",
-    };
-    private final int productCount = 6;
 }

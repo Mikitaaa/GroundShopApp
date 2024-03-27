@@ -11,7 +11,7 @@
         android:id="@+id/changePriceTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/change_price_title"
+        android:text=""
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
