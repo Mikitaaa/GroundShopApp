@@ -44,6 +44,7 @@ public class NotificationsFragment extends Fragment {
         noOrders.setLayoutParams(layoutParams);
 
         notificationsViewModel.getOrders().observe(getViewLifecycleOwner(), orders -> {
+            containerLayout.removeAllViews();
             if (orders != null && !orders.isEmpty()) {
                 noOrders.setVisibility(View.INVISIBLE);
                 layoutParams.height = 0;
@@ -59,7 +60,6 @@ public class NotificationsFragment extends Fragment {
                     orderItemView.setOnDeleteClickListener(v -> {
                         containerLayout.removeView(orderItemView);
                         notificationsViewModel.removeOrder(order);
-                        orders.remove(order);
                     });
                     containerLayout.addView(orderItemView);
                 }
