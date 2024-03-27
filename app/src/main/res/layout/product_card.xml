@@ -23,7 +23,7 @@
             android:layout_height="25dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="5dp"
+            android:layout_marginBottom="7dp"
             android:layout_marginEnd="10dp"
             android:clickable="true"
             android:focusable="true"
@@ -38,7 +38,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/name1"
             android:layout_alignParentBottom="true"
-            android:layout_marginTop="5dp"
             android:layout_marginBottom="34dp"
             android:contentDescription="photo1"
             android:src="@drawable/photo1" />
@@ -46,10 +45,9 @@
         <TextView
             android:id="@+id/name1"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center"
-
             android:text=""
             android:textColor="@color/price12_color"
             android:textSize="13sp"
