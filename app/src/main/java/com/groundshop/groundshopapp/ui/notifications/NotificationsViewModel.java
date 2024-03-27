@@ -63,9 +63,6 @@ public class NotificationsViewModel extends AndroidViewModel {
                 List<Order> parsedOrders = new OrderParser().parseOrders(result);
                 mOrders.setValue(parsedOrders);
             }
-            else {
-                // Handle null result here
-            }
         }
     }
 }

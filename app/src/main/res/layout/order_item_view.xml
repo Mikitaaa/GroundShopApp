@@ -160,6 +160,7 @@
                 android:text="@string/call_button"
                 android:textSize="12sp"
                 app:backgroundTint="@null"
+                android:textColor="@color/black"
                 tools:ignore="VisualLintButtonSize" />
         </LinearLayout>
 

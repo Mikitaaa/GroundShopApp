@@ -1,10 +1,13 @@
 package com.groundshop.groundshopapp.ui.notifications;
 
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -31,8 +34,9 @@ public class NotificationsFragment extends Fragment {
         LinearLayout containerLayout = root.findViewById(R.id.container);
 
         notificationsViewModel.getOrders().observe(getViewLifecycleOwner(), orders -> {
+            containerLayout.removeAllViews();
+
             if (orders != null && !orders.isEmpty()) {
-                containerLayout.removeAllViews();
 
                 for (Order order : orders) {
                     OrderItemView orderItemView = new OrderItemView(requireContext());
@@ -46,6 +50,13 @@ public class NotificationsFragment extends Fragment {
                     });
                     containerLayout.addView(orderItemView);
                 }
+            } else {
+                TextView noOrdersTextView = new TextView(requireContext());
+                noOrdersTextView.setText("Нет заказов");
+                noOrdersTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+                noOrdersTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+
+                containerLayout.addView(noOrdersTextView);
             }
         });
 
