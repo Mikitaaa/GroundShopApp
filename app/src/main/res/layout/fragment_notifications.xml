@@ -12,6 +12,15 @@
         android:orientation="vertical"
         android:paddingBottom="56dp"
         tools:context=".ui.notifications.NotificationsFragment">
+
+        <TextView
+            android:id="@+id/noOrderText"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:visibility="invisible"
+            android:text="@string/noOrders" />
     </LinearLayout>
 
 </ScrollView>

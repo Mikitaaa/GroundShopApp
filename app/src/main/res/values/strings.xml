@@ -14,4 +14,5 @@
     <string name="change_price_default_input">Введите цену</string>
     <string name="change_price_set_button">Ок</string>
     <string name="change_price_close_button">Закрыть</string>
+    <string name="noOrders">Нет заказов</string>
 </resources>

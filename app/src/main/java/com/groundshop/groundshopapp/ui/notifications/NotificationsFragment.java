@@ -1,8 +1,8 @@
 package com.groundshop.groundshopapp.ui.notifications;
 
 import android.os.Bundle;
-import android.util.TypedValue;
-import android.view.Gravity;
+import android.view.Display;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,11 +32,22 @@ public class NotificationsFragment extends Fragment {
         View root = binding.getRoot();
 
         LinearLayout containerLayout = root.findViewById(R.id.container);
+        TextView noOrders = containerLayout.findViewById(R.id.noOrderText);
+
+        Display display = requireActivity().getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+        int screenHeight = outMetrics.heightPixels;
+
+        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) noOrders.getLayoutParams();
+        layoutParams.height = screenHeight;
+        noOrders.setLayoutParams(layoutParams);
 
         notificationsViewModel.getOrders().observe(getViewLifecycleOwner(), orders -> {
-            containerLayout.removeAllViews();
-
             if (orders != null && !orders.isEmpty()) {
+                noOrders.setVisibility(View.INVISIBLE);
+                layoutParams.height = 0;
+                noOrders.setLayoutParams(layoutParams);
 
                 for (Order order : orders) {
                     OrderItemView orderItemView = new OrderItemView(requireContext());
@@ -47,16 +58,15 @@ public class NotificationsFragment extends Fragment {
 
                     orderItemView.setOnDeleteClickListener(v -> {
                         containerLayout.removeView(orderItemView);
+                        notificationsViewModel.removeOrder(order);
+                        orders.remove(order);
                     });
                     containerLayout.addView(orderItemView);
                 }
             } else {
-                TextView noOrdersTextView = new TextView(requireContext());
-                noOrdersTextView.setText("Нет заказов");
-                noOrdersTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-                noOrdersTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-
-                containerLayout.addView(noOrdersTextView);
+                noOrders.setVisibility(View.VISIBLE);
+                layoutParams.height = screenHeight;
+                noOrders.setLayoutParams(layoutParams);
             }
         });
 

@@ -23,9 +23,7 @@ public class HttpRequestHelper {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
-            // Adding headers
             connection.setRequestProperty("Content-Type", "application/json");
-            // Add Basic authentication header
 
             String encodedAuth = Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);
             connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
@@ -37,7 +35,6 @@ public class HttpRequestHelper {
                 response.append(line);
             }
 
-            // Log the response
             Log.d("HTTP_RESPONSE", "Response: " + response.toString());
 
         } catch (IOException e) {

@@ -15,18 +15,17 @@ import java.io.InputStream;
 import com.groundshop.groundshopapp.R;
 import androidx.annotation.NonNull;
 import android.app.Application;
+import android.content.Context;
 
 
 public class NotificationsViewModel extends AndroidViewModel {
-
     private final MutableLiveData<List<Order>> mOrders;
+    private String auth = null;
 
     public NotificationsViewModel(@NonNull Application application) {
         super(application);
 
         mOrders = new MutableLiveData<>();
-
-        String auth = null;
         try {
             InputStream inputStream = application.getResources().openRawResource(R.raw.auth);
             byte[] buffer = new byte[inputStream.available()];
@@ -38,17 +37,32 @@ public class NotificationsViewModel extends AndroidViewModel {
         }
 
         auth = auth.trim();
-        new HttpRequestTask(auth).execute("https://groundshop.vercel.app/api/route");
+
+        loadOrdersFromServer(application);
+    }
+
+    private void loadOrdersFromServer(Application application) {
+        new HttpRequestTask(auth, application.getApplicationContext()).execute("https://groundshop.vercel.app/api/route");
     }
 
     public LiveData<List<Order>> getOrders() { return mOrders; }
 
+    public void removeOrder(Order order) {
+        List<Order> orders = mOrders.getValue();
+        if (orders != null) {
+            orders.remove(order);
+            mOrders.setValue(orders);
+        }
+    }
+
     private class HttpRequestTask extends AsyncTask<String, Void, String> {
         private String auth;
+        private Context context;
 
-        public HttpRequestTask(String auth) {
+        public HttpRequestTask(String auth, Context context) {
             this.auth = auth;
         }
+
         @Override
         protected String doInBackground(String... urls) {
             if (urls.length < 1 || urls[0] == null) {
@@ -61,7 +75,14 @@ public class NotificationsViewModel extends AndroidViewModel {
         protected void onPostExecute(String result) {
             if (result != null) {
                 List<Order> parsedOrders = new OrderParser().parseOrders(result);
-                mOrders.setValue(parsedOrders);
+                List<Order> currentOrders = mOrders.getValue();
+
+                if (currentOrders != null) {
+                    currentOrders.addAll(parsedOrders);
+                    mOrders.setValue(currentOrders);
+                } else {
+                    mOrders.setValue(parsedOrders);
+                }
             }
         }
     }
