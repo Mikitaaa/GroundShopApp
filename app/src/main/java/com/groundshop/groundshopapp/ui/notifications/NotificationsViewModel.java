@@ -42,7 +42,7 @@ public class NotificationsViewModel extends AndroidViewModel {
     }
 
     private void loadOrdersFromServer(Application application) {
-        new HttpRequestTask(auth, application.getApplicationContext()).execute("https://groundshop.vercel.app/api/route");
+        new HttpRequestTask(auth).execute("https://groundshop.vercel.app/api/route");
     }
 
     public LiveData<List<Order>> getOrders() { return mOrders; }
@@ -57,9 +57,8 @@ public class NotificationsViewModel extends AndroidViewModel {
 
     private class HttpRequestTask extends AsyncTask<String, Void, String> {
         private String auth;
-        private Context context;
 
-        public HttpRequestTask(String auth, Context context) {
+        public HttpRequestTask(String auth) {
             this.auth = auth;
         }
 

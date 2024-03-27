@@ -46,10 +46,6 @@ public class NotificationsFragment extends Fragment {
         notificationsViewModel.getOrders().observe(getViewLifecycleOwner(), orders -> {
             containerLayout.removeAllViews();
             if (orders != null && !orders.isEmpty()) {
-                noOrders.setVisibility(View.INVISIBLE);
-                layoutParams.height = 0;
-                noOrders.setLayoutParams(layoutParams);
-
                 for (Order order : orders) {
                     OrderItemView orderItemView = new OrderItemView(requireContext());
 
@@ -64,9 +60,7 @@ public class NotificationsFragment extends Fragment {
                     containerLayout.addView(orderItemView);
                 }
             } else {
-                noOrders.setVisibility(View.VISIBLE);
-                layoutParams.height = screenHeight;
-                noOrders.setLayoutParams(layoutParams);
+                containerLayout.addView(noOrders);
             }
         });
 

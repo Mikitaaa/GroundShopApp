@@ -19,7 +19,6 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:gravity="center"
-            android:visibility="invisible"
             android:text="@string/noOrders" />
     </LinearLayout>
 

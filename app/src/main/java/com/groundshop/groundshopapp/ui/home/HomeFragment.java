@@ -55,8 +55,13 @@ public class HomeFragment extends Fragment {
             TextView productPriceView = childView.findViewById(R.id.price1);
             productPriceView.setText(productPrice);
 
+            String photoName;
+            if(index>6){ 
+                photoName = "photo_250";
+            }else{ photoName = "photo" + (index); }
+
             ImageView productPhotoView = childView.findViewById(R.id.photo1);
-            int resId = getResources().getIdentifier("photo" + (index), "drawable", requireContext().getPackageName());
+            int resId = getResources().getIdentifier(photoName, "drawable", requireContext().getPackageName());
             productPhotoView.setImageResource(resId);
 
             productPriceView.setOnClickListener(v -> {
