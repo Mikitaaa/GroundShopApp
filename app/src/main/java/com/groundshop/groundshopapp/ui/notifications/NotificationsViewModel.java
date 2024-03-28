@@ -1,31 +1,39 @@
 package com.groundshop.groundshopapp.ui.notifications;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.AndroidViewModel;
 
 import com.groundshop.groundshopapp.ui.parser.HttpRequestHelper;
 import com.groundshop.groundshopapp.ui.parser.Order;
 import com.groundshop.groundshopapp.ui.parser.OrderParser;
 import java.util.List;
+
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
+
+import com.groundshop.groundshopapp.ui.orderDao;
+import com.groundshop.groundshopapp.ui.OrderDatabase;
 
 import java.io.IOException;
 import java.io.InputStream;
 import com.groundshop.groundshopapp.R;
 import androidx.annotation.NonNull;
+
 import android.app.Application;
-import android.content.Context;
 
 
 public class NotificationsViewModel extends AndroidViewModel {
-    private final MutableLiveData<List<Order>> mOrders;
+    private LiveData<List<Order>> mOrders;
     private String auth = null;
+    private final orderDao orderDao;
 
     public NotificationsViewModel(@NonNull Application application) {
         super(application);
 
-        mOrders = new MutableLiveData<>();
+        OrderDatabase database = OrderDatabase.getInstance(application);
+        orderDao = database.orderDao();
+        mOrders = orderDao.getOrders();
+
         try {
             InputStream inputStream = application.getResources().openRawResource(R.raw.auth);
             byte[] buffer = new byte[inputStream.available()];
@@ -38,25 +46,39 @@ public class NotificationsViewModel extends AndroidViewModel {
 
         auth = auth.trim();
 
-        loadOrdersFromServer(application);
+        loadOrdersFromServer();
     }
 
-    private void loadOrdersFromServer(Application application) {
+    private void loadOrdersFromServer() {
         new HttpRequestTask(auth).execute("https://groundshop.vercel.app/api/route");
     }
 
     public LiveData<List<Order>> getOrders() { return mOrders; }
 
     public void removeOrder(Order order) {
-        List<Order> orders = mOrders.getValue();
-        if (orders != null) {
-            orders.remove(order);
-            mOrders.setValue(orders);
+        new RemoveOrderAsyncTask(orderDao).execute(order);
+    }
+
+    private static class RemoveOrderAsyncTask extends AsyncTask<Order, Void, Void> {
+        private final orderDao orderDao;
+
+        public RemoveOrderAsyncTask(com.groundshop.groundshopapp.ui.orderDao orderDao) {
+            this.orderDao = orderDao;
+        }
+
+        @Override
+        protected Void doInBackground(Order... orders) {
+            if (orders != null && orders.length > 0) {
+                Order order = orders[0];
+                orderDao.deleteOrder(order.getId());
+            }
+            return null;
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class HttpRequestTask extends AsyncTask<String, Void, String> {
-        private String auth;
+        private final String auth;
 
         public HttpRequestTask(String auth) {
             this.auth = auth;
@@ -74,15 +96,26 @@ public class NotificationsViewModel extends AndroidViewModel {
         protected void onPostExecute(String result) {
             if (result != null) {
                 List<Order> parsedOrders = new OrderParser().parseOrders(result);
-                List<Order> currentOrders = mOrders.getValue();
-
-                if (currentOrders != null) {
-                    currentOrders.addAll(parsedOrders);
-                    mOrders.setValue(currentOrders);
-                } else {
-                    mOrders.setValue(parsedOrders);
-                }
+                mOrders = orderDao.getOrders();
+                new InsertOrdersAsyncTask(orderDao).execute(parsedOrders);
             }
+        }
+    }
+    private static class InsertOrdersAsyncTask extends AsyncTask<List<Order>, Void, Void> {
+        private final orderDao orderDao;
+
+        public InsertOrdersAsyncTask(orderDao orderDao) {
+            this.orderDao = orderDao;
+        }
+
+        @SafeVarargs
+        @Override
+        protected final Void doInBackground(List<Order>... lists) {
+            if (lists != null && lists.length > 0) {
+                List<Order> orders = lists[0];
+                orderDao.insertOrders(orders);
+            }
+            return null;
         }
     }
 }

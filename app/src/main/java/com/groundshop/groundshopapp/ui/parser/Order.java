@@ -1,6 +1,12 @@
 package com.groundshop.groundshopapp.ui.parser;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "orders")
+
 public class Order {
+    @PrimaryKey(autoGenerate = true)
     private int id;
     private String name;
     private String phone;
