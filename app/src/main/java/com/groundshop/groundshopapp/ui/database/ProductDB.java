@@ -48,17 +48,43 @@ public class ProductDB extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void initDBifNotExist(SQLiteDatabase db) {
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_PRODUCTS, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            int count = cursor.getInt(0);
+            cursor.close();
+            if (count == 0) {
+                final String[] productVolumes = {
+                        "100л", "100л", "100л", "100л", "100л", "100л",
+                        "250л", "250л", "250л", "250л", "250л", "250л"
+                };
+                final String[] productNames = {
+                        "Голубика", "Универсальный", "Кислый", "Нейтрал", "Компост", "Высокие Грядки",
+                        "Голубика", "Универсальный", "Кислый", "Нейтрал", "Компост", "Высокие Грядки"
+                };
+                final String[] productPrices = {
+                        "20 руб.", "21 руб.", "16.50 руб.", "18 руб.", "23 руб.", "29 руб.",
+                        "38 руб.", "42 руб.", "29 руб.", "32 руб.", "42 руб.", "54 руб."
+                };
+                for (int i = 1; i < productNames.length; i++) {
+                    ContentValues values = new ContentValues();
+                    values.put(COLUMN_ID, i);
+                    values.put(COLUMN_NAME, productNames[i]);
+                    values.put(COLUMN_PRICE, productPrices[i]);
+                    values.put(COLUMN_VOLUME, productVolumes[i]);
+                    db.insert(TABLE_PRODUCTS, null, values);
+                }
+            }
+        }
+    }
+
     public void updateProductPrice(int id, String newPrice) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_PRICE, newPrice);
         db.update(TABLE_PRODUCTS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
-    }
-
-    public Cursor getAllProducts() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.query(TABLE_PRODUCTS, null, null, null, null, null, null);
     }
 
     @SuppressLint("Range")
@@ -118,8 +144,5 @@ public class ProductDB extends SQLiteOpenHelper {
         return productName;
     }
 
-    public void deleteDatabase(Context context) {
-        context.deleteDatabase(DATABASE_NAME);
-    }
 }
 

@@ -1,6 +1,7 @@
 package com.groundshop.groundshopapp.ui.home;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,6 +42,9 @@ public class HomeFragment extends Fragment {
 
         Context context = getContext();
         dataBase = new ProductDB(context);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        dataBase.initDBifNotExist(db);
+
         int childCount = gridLayout.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View childView = gridLayout.getChildAt(i);
@@ -56,7 +60,7 @@ public class HomeFragment extends Fragment {
             productPriceView.setText(productPrice);
 
             String photoName;
-            if(index>6){ 
+            if(index>6){
                 photoName = "photo_250";
             }else{ photoName = "photo" + (index); }
 
