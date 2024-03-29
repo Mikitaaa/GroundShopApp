@@ -6,6 +6,9 @@ import androidx.lifecycle.AndroidViewModel;
 import com.groundshop.groundshopapp.ui.parser.HttpRequestHelper;
 import com.groundshop.groundshopapp.ui.parser.Order;
 import com.groundshop.groundshopapp.ui.parser.OrderParser;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import android.annotation.SuppressLint;
@@ -20,6 +23,10 @@ import com.groundshop.groundshopapp.R;
 import androidx.annotation.NonNull;
 
 import android.app.Application;
+import android.util.Log;
+
+import java.net.HttpURLConnection;
+
 
 
 public class NotificationsViewModel extends AndroidViewModel {
@@ -77,7 +84,7 @@ public class NotificationsViewModel extends AndroidViewModel {
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class HttpRequestTask extends AsyncTask<String, Void, String> {
+    private class HttpRequestTask extends AsyncTask<String, Void, String[]> {
         private final String auth;
 
         public HttpRequestTask(String auth) {
@@ -85,19 +92,31 @@ public class NotificationsViewModel extends AndroidViewModel {
         }
 
         @Override
-        protected String doInBackground(String... urls) {
+        protected String[] doInBackground(String... urls) {
             if (urls.length < 1 || urls[0] == null) {
                 return null;
             }
+
             return HttpRequestHelper.sendGetRequest(urls[0], auth);
         }
 
         @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-                List<Order> parsedOrders = new OrderParser().parseOrders(result);
-                mOrders = orderDao.getOrders();
-                new InsertOrdersAsyncTask(orderDao).execute(parsedOrders);
+        protected void onPostExecute(String[] resultAndStatus) {
+            if (resultAndStatus != null && resultAndStatus.length == 2) {
+                String result = resultAndStatus[0];
+                int status = Integer.parseInt(resultAndStatus[1]);
+
+                if (status == HttpURLConnection.HTTP_OK) {
+                    List<Order> parsedOrders = new OrderParser().parseOrders(result);
+                    mOrders = orderDao.getOrders();
+                    new InsertOrdersAsyncTask(orderDao).execute(parsedOrders);
+                } else if (status == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    Log.e("HTTP_RESPONSE", "Bad authorization");
+                } else if (status == HttpURLConnection.HTTP_NO_CONTENT) {
+                    Log.d("HTTP_RESPONSE", "No content received from the server");
+                }else {
+                    Log.e("HTTP_RESPONSE", "Unexpected response code: " + status);
+                }
             }
         }
     }

@@ -12,31 +12,32 @@ import java.net.URL;
 
 public class HttpRequestHelper {
 
-    public static String sendGetRequest(final String endpoint, String auth) {
+    public static String[] sendGetRequest(final String endpoint, String auth) {
         StringBuilder response = new StringBuilder();
         HttpURLConnection connection = null;
         BufferedReader reader = null;
+        String[] res = new String[2];
 
         try {
-
             URL url = new URL(endpoint);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-
             connection.setRequestProperty("Content-Type", "application/json");
 
             String encodedAuth = Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);
             connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
 
-            InputStream inputStream = connection.getInputStream();
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
+            int statusCode = connection.getResponseCode();
+            res[1] = String.valueOf(statusCode);
+
+            if (statusCode == HttpURLConnection.HTTP_OK) {
+                InputStream inputStream = connection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
             }
-
-            Log.d("HTTP_RESPONSE", "Response: " + response.toString());
-
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("HTTP_REQUEST", "Error occurred during HTTP request: " + e.getMessage());
@@ -53,7 +54,7 @@ public class HttpRequestHelper {
                 }
             }
         }
-
-        return response.toString();
+        res[0] = response.toString();
+        return res;
     }
 }
