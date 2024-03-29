@@ -127,19 +127,16 @@ public class NotificationsViewModel extends AndroidViewModel {
                     new InsertOrdersAsyncTask(orderDao).execute(parsedOrders);
                 } else if (status == HttpURLConnection.HTTP_UNAUTHORIZED) {
                     openDialog("Неудалось авторизировать");
-                    Log.e("HTTP_RESPONSE", "Bad authorization");
                 } else if (status == HttpURLConnection.HTTP_NO_CONTENT) {
-                    openDialog("Нет заказов");
-                    Log.d("HTTP_RESPONSE", "No content received from the server");
+                    openDialog("Нет новых заказов");
                 }else {
                     openDialog("Ошибка получения заказов");
-                    Log.e("HTTP_RESPONSE", "Unexpected response code: " + status);
                 }
             }
         }
     }
     public void openDialog(String title) {
-        final Dialog dialog = new Dialog(activity); // Context, this, etc.
+        final Dialog dialog = new Dialog(activity);
         dialog.setContentView(R.layout.alert_window);
         dialog.setTitle(title);
 
