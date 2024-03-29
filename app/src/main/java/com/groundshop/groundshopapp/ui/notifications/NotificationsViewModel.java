@@ -3,21 +3,16 @@ package com.groundshop.groundshopapp.ui.notifications;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.AndroidViewModel;
 
-import com.groundshop.groundshopapp.MainActivity;
 import com.groundshop.groundshopapp.ui.parser.HttpRequestHelper;
 import com.groundshop.groundshopapp.ui.parser.Order;
 import com.groundshop.groundshopapp.ui.parser.OrderParser;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
+
 import android.os.AsyncTask;
 
 import com.groundshop.groundshopapp.ui.orderDao;
@@ -29,10 +24,11 @@ import com.groundshop.groundshopapp.R;
 import androidx.annotation.NonNull;
 
 import android.app.Application;
-import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.net.HttpURLConnection;
 
@@ -138,7 +134,14 @@ public class NotificationsViewModel extends AndroidViewModel {
     public void openDialog(String title) {
         final Dialog dialog = new Dialog(activity);
         dialog.setContentView(R.layout.alert_window);
-        dialog.setTitle(title);
+
+        TextView titleTextView = dialog.findViewById(R.id.alert_title);
+        titleTextView.setText(title);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(R.drawable._bg_alert_window);
+        }
 
         Button cancelButton = dialog.findViewById(R.id.dialog_cancel);
         cancelButton.setOnClickListener(new View.OnClickListener() {
