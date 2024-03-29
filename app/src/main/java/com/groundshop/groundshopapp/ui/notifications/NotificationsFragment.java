@@ -40,7 +40,7 @@ public class NotificationsFragment extends Fragment {
         Display display = requireActivity().getWindowManager().getDefaultDisplay();
         DisplayMetrics outMetrics = new DisplayMetrics();
         display.getMetrics(outMetrics);
-        int screenHeight = outMetrics.heightPixels;
+        int screenHeight = outMetrics.heightPixels-200;
 
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) noOrders.getLayoutParams();
         layoutParams.height = screenHeight;

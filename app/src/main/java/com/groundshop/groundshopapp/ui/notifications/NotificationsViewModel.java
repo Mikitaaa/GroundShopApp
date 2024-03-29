@@ -1,5 +1,6 @@
 package com.groundshop.groundshopapp.ui.notifications;
 
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.AndroidViewModel;
 
@@ -11,8 +12,10 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import com.groundshop.groundshopapp.ui.orderDao;
@@ -24,10 +27,11 @@ import com.groundshop.groundshopapp.R;
 import androidx.annotation.NonNull;
 
 import android.app.Application;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.net.HttpURLConnection;
@@ -132,24 +136,27 @@ public class NotificationsViewModel extends AndroidViewModel {
         }
     }
     public void openDialog(String title) {
-        final Dialog dialog = new Dialog(activity);
-        dialog.setContentView(R.layout.alert_window);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        View customView = LayoutInflater.from(activity).inflate(R.layout.alert_window, null);
+        builder.setView(customView);
 
-        TextView titleTextView = dialog.findViewById(R.id.alert_title);
+        TextView titleTextView = customView.findViewById(R.id.alert_title);
         titleTextView.setText(title);
 
-        Window window = dialog.getWindow();
-        if (window != null) {
-            window.setBackgroundDrawableResource(R.drawable._bg_alert_window);
-        }
+        AlertDialog dialog = builder.create();
 
-        Button cancelButton = dialog.findViewById(R.id.dialog_cancel);
+        Button cancelButton = customView.findViewById(R.id.dialog_cancel);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
             }
         });
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(R.drawable._bg_alert_window);
+        }
 
         dialog.show();
     }
