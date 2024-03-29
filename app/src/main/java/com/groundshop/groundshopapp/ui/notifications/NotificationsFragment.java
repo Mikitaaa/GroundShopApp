@@ -1,5 +1,6 @@
 package com.groundshop.groundshopapp.ui.notifications;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.Display;
 import android.util.DisplayMetrics;
@@ -23,11 +24,13 @@ public class NotificationsFragment extends Fragment {
     private FragmentNotificationsBinding binding;
     private NotificationsViewModel notificationsViewModel;
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         notificationsViewModel =
                 new ViewModelProvider(this).get(NotificationsViewModel.class);
-
+        Activity activity = requireActivity();
+        notificationsViewModel.setActivity(activity);
         binding = FragmentNotificationsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 

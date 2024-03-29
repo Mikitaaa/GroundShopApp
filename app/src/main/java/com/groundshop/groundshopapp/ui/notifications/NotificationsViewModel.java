@@ -3,6 +3,7 @@ package com.groundshop.groundshopapp.ui.notifications;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.AndroidViewModel;
 
+import com.groundshop.groundshopapp.MainActivity;
 import com.groundshop.groundshopapp.ui.parser.HttpRequestHelper;
 import com.groundshop.groundshopapp.ui.parser.Order;
 import com.groundshop.groundshopapp.ui.parser.OrderParser;
@@ -12,6 +13,11 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 
 import com.groundshop.groundshopapp.ui.orderDao;
@@ -24,6 +30,9 @@ import androidx.annotation.NonNull;
 
 import android.app.Application;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import java.net.HttpURLConnection;
 
@@ -33,6 +42,12 @@ public class NotificationsViewModel extends AndroidViewModel {
     private LiveData<List<Order>> mOrders;
     private String auth = null;
     private final orderDao orderDao;
+    private Activity activity;
+
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
+
 
     public NotificationsViewModel(@NonNull Application application) {
         super(application);
@@ -111,14 +126,32 @@ public class NotificationsViewModel extends AndroidViewModel {
                     mOrders = orderDao.getOrders();
                     new InsertOrdersAsyncTask(orderDao).execute(parsedOrders);
                 } else if (status == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    openDialog("Неудалось авторизировать");
                     Log.e("HTTP_RESPONSE", "Bad authorization");
                 } else if (status == HttpURLConnection.HTTP_NO_CONTENT) {
+                    openDialog("Нет заказов");
                     Log.d("HTTP_RESPONSE", "No content received from the server");
                 }else {
+                    openDialog("Ошибка получения заказов");
                     Log.e("HTTP_RESPONSE", "Unexpected response code: " + status);
                 }
             }
         }
+    }
+    public void openDialog(String title) {
+        final Dialog dialog = new Dialog(activity); // Context, this, etc.
+        dialog.setContentView(R.layout.alert_window);
+        dialog.setTitle(title);
+
+        Button cancelButton = dialog.findViewById(R.id.dialog_cancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
     private static class InsertOrdersAsyncTask extends AsyncTask<List<Order>, Void, Void> {
         private final orderDao orderDao;
