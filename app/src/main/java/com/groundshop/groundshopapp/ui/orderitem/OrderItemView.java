@@ -1,6 +1,8 @@
 package com.groundshop.groundshopapp.ui.orderitem;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +15,7 @@ public class OrderItemView extends LinearLayout {
     private TextView orderPhoneTextView;
     private TextView orderNameTextView;
     private Button deleteButton;
+    private Button callButton;
 
     public OrderItemView(Context context) {
         super(context);
@@ -36,6 +39,19 @@ public class OrderItemView extends LinearLayout {
         orderPhoneTextView = findViewById(R.id.input_phone_text_view);
         orderNameTextView = findViewById(R.id.input_name_text_view);
         deleteButton = findViewById(R.id.delete_button);
+        callButton = findViewById(R.id.call_button);
+
+        callButton.setOnClickListener(v -> {
+            // Получаем номер телефона из TextView
+            String phoneNumber = orderPhoneTextView.getText().toString();
+
+            // Создаем интент для открытия приложения телефон с номером телефона
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:" + phoneNumber));
+
+            // Запускаем интент
+            getContext().startActivity(intent);
+        });
     }
 
     public void setOrderDetails(String details) {
