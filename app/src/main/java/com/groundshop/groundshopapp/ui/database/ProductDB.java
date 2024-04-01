@@ -64,8 +64,8 @@ public class ProductDB extends SQLiteOpenHelper {
                         "Голубика", "Универсальный", "Кислый", "Нейтрал", "Компост", "Высокие Грядки"
                 };
                 final String[] productPrices = {
-                        "20 руб.", "21 руб.", "16.50 руб.", "18 руб.", "23 руб.", "29 руб.",
-                        "38 руб.", "42 руб.", "29 руб.", "32 руб.", "42 руб.", "54 руб."
+                        "20", "21", "16.50", "18", "23", "29",
+                        "38", "42", "29", "32", "42", "54"
                 };
                 for (int i = 0; i < productNames.length; i++) {
                     ContentValues values = new ContentValues();

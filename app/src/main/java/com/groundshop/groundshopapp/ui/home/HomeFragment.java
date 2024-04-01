@@ -57,7 +57,7 @@ public class HomeFragment extends Fragment {
             productNameView.setText(productName);
 
             TextView productPriceView = childView.findViewById(R.id.price1);
-            productPriceView.setText(productPrice);
+            productPriceView.setText(productPrice+ " руб.");
 
             String photoName;
             if(index>6){
