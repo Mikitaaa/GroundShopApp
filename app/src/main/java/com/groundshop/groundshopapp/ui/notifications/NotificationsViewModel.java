@@ -1,6 +1,5 @@
 package com.groundshop.groundshopapp.ui.notifications;
 
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.AndroidViewModel;
 
@@ -13,9 +12,7 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import com.groundshop.groundshopapp.ui.orderDao;
@@ -29,7 +26,6 @@ import androidx.annotation.NonNull;
 import android.app.Application;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;

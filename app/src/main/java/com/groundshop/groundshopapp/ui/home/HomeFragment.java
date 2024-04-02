@@ -1,7 +1,9 @@
 package com.groundshop.groundshopapp.ui.home;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,11 +26,28 @@ import android.app.AlertDialog;
 import android.widget.EditText;
 import android.widget.Button;
 
+import com.groundshop.groundshopapp.ui.notifications.NotificationsViewModel;
+import com.groundshop.groundshopapp.ui.parser.HttpRequestHelper;
+import com.groundshop.groundshopapp.ui.parser.Order;
+import com.groundshop.groundshopapp.ui.parser.OrderParser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private ProductDB dataBase;
+    private String auth = null;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -44,6 +63,20 @@ public class HomeFragment extends Fragment {
         dataBase = new ProductDB(context);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         dataBase.initDBifNotExist(db);
+
+        try {
+            InputStream inputStream = getResources().openRawResource(R.raw.auth);
+            byte[] buffer = new byte[inputStream.available()];
+            inputStream.read(buffer);
+            auth = new String(buffer);
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        auth = auth.trim();
+
+        loadPricesFromServer();
 
         int childCount = gridLayout.getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -74,6 +107,93 @@ public class HomeFragment extends Fragment {
         }
 
         return root;
+    }
+
+    private void loadPricesFromServer() {
+        new HomeFragment.HttpRequestTask(auth).execute("https://groundshop.vercel.app/api/prices");
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class HttpRequestTask extends AsyncTask<String, Void, String[]> {
+        private final String auth;
+
+        public HttpRequestTask(String auth) {
+            this.auth = auth;
+        }
+
+        @Override
+        protected String[] doInBackground(String... urls) {
+            if (urls.length < 1 || urls[0] == null) {
+                return null;
+            }
+            return HttpRequestHelper.sendGetRequest(urls[0], auth);
+        }
+
+        @Override
+        protected void onPostExecute(String[] resultAndStatus) {
+            if (resultAndStatus != null && resultAndStatus.length == 2) {
+                String result = resultAndStatus[0];
+                int status = Integer.parseInt(resultAndStatus[1]);
+
+                if (status == HttpURLConnection.HTTP_OK) {
+                    Map<String, String> pricesMap = convertStringToMap(result);
+                    if (pricesMap != null && !pricesMap.isEmpty()) {
+                        for (Map.Entry<String, String> entry : pricesMap.entrySet()) {
+                            String productName = entry.getKey();
+                            String productPrice = entry.getValue();
+                            Log.d("PRODUCT_GET", "VALUE: " + productName + ": " + productPrice);
+                            // Найдите соответствующий productPriceView и установите цену
+                            // productPriceView.setText(productPrice + " руб.");
+                        }
+                    }
+                }else {
+                    openDialog("Ошибка получения цен с сайта");
+                }
+            }
+        }
+
+    }
+
+    private Map<String, String> convertStringToMap(String result) {
+        Map<String, String> pricesMap = new HashMap<>();
+        try {
+            JSONObject jsonResponse = new JSONObject(result);
+            Iterator<String> keys = jsonResponse.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String value = jsonResponse.getString(key);
+                pricesMap.put(key, value);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return pricesMap;
+    }
+
+    public void openDialog(String title) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        View customView = LayoutInflater.from(requireActivity()).inflate(R.layout.alert_window, null);
+        builder.setView(customView);
+
+        TextView titleTextView = customView.findViewById(R.id.alert_title);
+        titleTextView.setText(title);
+
+        AlertDialog dialog = builder.create();
+
+        Button cancelButton = customView.findViewById(R.id.dialog_cancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(R.drawable._bg_alert_window);
+        }
+
+        dialog.show();
     }
 
     private void showProductDetailsDialog(int index, String productName, String oldPrice, TextView productPriceView) {
