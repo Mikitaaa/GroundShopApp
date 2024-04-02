@@ -48,6 +48,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private ProductDB dataBase;
     private String auth = null;
+    private GridLayout gridLayout;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -57,7 +58,7 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        GridLayout gridLayout = root.findViewById(R.id.gridLayout);
+        gridLayout = root.findViewById(R.id.gridLayout);
 
         Context context = getContext();
         dataBase = new ProductDB(context);
@@ -76,21 +77,17 @@ public class HomeFragment extends Fragment {
 
         auth = auth.trim();
 
-        loadPricesFromServer();
-
         int childCount = gridLayout.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View childView = gridLayout.getChildAt(i);
             final int index = i+1;
 
             String productName = dataBase.getProductNameById(index);
-            String productPrice = dataBase.getProductPriceById(index);
 
             TextView productNameView = childView.findViewById(R.id.name1);
             productNameView.setText(productName);
 
             TextView productPriceView = childView.findViewById(R.id.price1);
-            productPriceView.setText(productPrice+ " руб.");
 
             String photoName;
             if(index>6){
@@ -105,6 +102,7 @@ public class HomeFragment extends Fragment {
                 showProductDetailsDialog(index, productName, dataBase.getProductPriceById(index), productPriceView);
             });
         }
+        loadPricesFromServer();
 
         return root;
     }
@@ -139,11 +137,15 @@ public class HomeFragment extends Fragment {
                     Map<String, String> pricesMap = convertStringToMap(result);
                     if (pricesMap != null && !pricesMap.isEmpty()) {
                         for (Map.Entry<String, String> entry : pricesMap.entrySet()) {
-                            String productName = entry.getKey();
+                            int productID = Integer.parseInt(entry.getKey())-1;
                             String productPrice = entry.getValue();
-                            Log.d("PRODUCT_GET", "VALUE: " + productName + ": " + productPrice);
-                            // Найдите соответствующий productPriceView и установите цену
-                            // productPriceView.setText(productPrice + " руб.");
+                            dataBase.updateProductPrice(productID, productPrice);
+
+                            View childView = gridLayout.getChildAt(productID);
+                            if (childView != null) {
+                                TextView productPriceView = childView.findViewById(R.id.price1);
+                                productPriceView.setText(productPrice+ " руб.");
+                            }
                         }
                     }
                 }else {
