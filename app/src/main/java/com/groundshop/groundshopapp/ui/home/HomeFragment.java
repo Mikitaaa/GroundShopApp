@@ -99,7 +99,7 @@ public class HomeFragment extends Fragment {
             productPhotoView.setImageResource(resId);
 
             productPriceView.setOnClickListener(v -> {
-                showProductDetailsDialog(index, productName, dataBase.getProductPriceById(index), productPriceView);
+                showProductDetailsDialog(index, productName, productPriceView);
             });
         }
         loadPricesFromServer();
@@ -137,11 +137,11 @@ public class HomeFragment extends Fragment {
                     Map<String, String> pricesMap = convertStringToMap(result);
                     if (pricesMap != null && !pricesMap.isEmpty()) {
                         for (Map.Entry<String, String> entry : pricesMap.entrySet()) {
-                            int productID = Integer.parseInt(entry.getKey())-1;
+                            int productID = Integer.parseInt(entry.getKey());
                             String productPrice = entry.getValue();
                             dataBase.updateProductPrice(productID, productPrice);
 
-                            View childView = gridLayout.getChildAt(productID);
+                            View childView = gridLayout.getChildAt(productID-1);
                             if (childView != null) {
                                 TextView productPriceView = childView.findViewById(R.id.price1);
                                 productPriceView.setText(productPrice+ " руб.");
@@ -198,7 +198,7 @@ public class HomeFragment extends Fragment {
         dialog.show();
     }
 
-    private void showProductDetailsDialog(int index, String productName, String oldPrice, TextView productPriceView) {
+    private void showProductDetailsDialog(int index, String productName, TextView productPriceView) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View customLayout = getLayoutInflater().inflate(R.layout.change_price_window, null);
         builder.setView(customLayout);
@@ -209,8 +209,9 @@ public class HomeFragment extends Fragment {
         Button setButton = customLayout.findViewById(R.id.setButton);
 
         String volume = dataBase.getProductVolumeById(index);
+        String Price = dataBase.getProductPriceById(index);
 
-        dialogInput.setText(oldPrice);
+        dialogInput.setText(Price);
         dialogTitle.setText(productName+" ("+volume+")");
 
         AlertDialog dialog = builder.create();

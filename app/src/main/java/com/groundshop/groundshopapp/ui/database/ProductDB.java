@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class ProductDB extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "products.db";
@@ -69,7 +70,7 @@ public class ProductDB extends SQLiteOpenHelper {
                 };
                 for (int i = 0; i < productNames.length; i++) {
                     ContentValues values = new ContentValues();
-                    values.put(COLUMN_ID, i+1);
+                    values.put(COLUMN_ID, (i+1));
                     values.put(COLUMN_NAME, productNames[i]);
                     values.put(COLUMN_PRICE, productPrices[i]);
                     values.put(COLUMN_VOLUME, productVolumes[i]);
