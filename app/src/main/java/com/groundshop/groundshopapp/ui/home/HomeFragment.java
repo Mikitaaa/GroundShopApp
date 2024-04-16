@@ -26,10 +26,7 @@ import android.app.AlertDialog;
 import android.widget.EditText;
 import android.widget.Button;
 
-import com.groundshop.groundshopapp.ui.notifications.NotificationsViewModel;
 import com.groundshop.groundshopapp.ui.parser.HttpRequestHelper;
-import com.groundshop.groundshopapp.ui.parser.Order;
-import com.groundshop.groundshopapp.ui.parser.OrderParser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,7 +36,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 
@@ -108,14 +104,14 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadPricesFromServer() {
-        new HomeFragment.HttpRequestTask(auth).execute("https://groundshop.vercel.app/api/prices");
+        new GetRequestTask(auth).execute("https://groundshop.by/api/prices");
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class HttpRequestTask extends AsyncTask<String, Void, String[]> {
+    private class GetRequestTask extends AsyncTask<String, Void, String[]> {
         private final String auth;
 
-        public HttpRequestTask(String auth) {
+        public GetRequestTask(String auth) {
             this.auth = auth;
         }
 
@@ -134,7 +130,7 @@ public class HomeFragment extends Fragment {
                 int status = Integer.parseInt(resultAndStatus[1]);
 
                 if (status == HttpURLConnection.HTTP_OK) {
-                    Map<String, String> pricesMap = convertStringToMap(result);
+                    Map<String, String> pricesMap = convertJsonStringToMap(result);
                     if (pricesMap != null && !pricesMap.isEmpty()) {
                         for (Map.Entry<String, String> entry : pricesMap.entrySet()) {
                             int productID = Integer.parseInt(entry.getKey());
@@ -156,7 +152,7 @@ public class HomeFragment extends Fragment {
 
     }
 
-    private Map<String, String> convertStringToMap(String result) {
+    private Map<String, String> convertJsonStringToMap(String result) {
         Map<String, String> pricesMap = new HashMap<>();
         try {
             JSONObject jsonResponse = new JSONObject(result);
@@ -228,9 +224,7 @@ public class HomeFragment extends Fragment {
             String newPrice = dialogInput.getText().toString();
 
             if (!newPrice.isEmpty()) {
-                dataBase.updateProductPrice(index, newPrice);
-                Log.d("SetButton", "Price updated for product ID: " + index + ", New Price: " + newPrice);
-                productPriceView.setText(newPrice);
+                new PostRequestTask(auth, index, newPrice, productPriceView).execute("https://groundshop.by/api/prices");
             } else {
                 Log.d("SetButton", "New price is empty");
             }
@@ -241,7 +235,47 @@ public class HomeFragment extends Fragment {
         closeButton.setOnClickListener(v -> {
             dialog.dismiss();
         });
+    }
 
+    @SuppressLint("StaticFieldLeak")
+    private class PostRequestTask extends AsyncTask<String, Void, String> {
+        private final String auth;
+        private final int index;
+        private final String newPrice;
+        private final TextView productPriceView;
+
+        public PostRequestTask(String auth, int index, String newPrice, TextView productPriceView) {
+            this.auth = auth;
+            this.index = index;
+            this.newPrice = newPrice;
+            this.productPriceView = productPriceView;
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+            if (urls.length < 1 || urls[0] == null) {
+                return null;
+            }
+            String jsonData = "{\"" + index + "\": \"" + newPrice + "\"}";
+            return HttpRequestHelper.sendPostRequest(urls[0], auth, jsonData);
+        }
+
+        @Override
+        protected void onPostExecute(String Status) {
+            if (Status != null) {
+                int status = Integer.parseInt(Status);
+
+                if (status == HttpURLConnection.HTTP_OK) {
+                    dataBase.updateProductPrice(index, newPrice);
+                    openDialog("Цена обновлена");
+                    productPriceView.setText(newPrice + " руб.");
+                } else {
+                    openDialog("Ошибка отправки цены");
+                }
+            } else {
+                Log.e("PostRequestTask", "Status code is null");
+            }
+        }
     }
 
     @Override

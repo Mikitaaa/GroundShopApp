@@ -68,7 +68,7 @@ public class NotificationsViewModel extends AndroidViewModel {
     }
 
     private void loadOrdersFromServer() {
-        new HttpRequestTask(auth).execute("https://groundshop.vercel.app/api/route");
+        new HttpRequestTask(auth).execute("https://groundshop.by/api/route");
     }
 
     public LiveData<List<Order>> getOrders() { return mOrders; }
