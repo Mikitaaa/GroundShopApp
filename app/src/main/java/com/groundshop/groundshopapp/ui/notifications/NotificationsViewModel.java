@@ -1,5 +1,8 @@
 package com.groundshop.groundshopapp.ui.notifications;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.AndroidViewModel;
 
@@ -9,10 +12,15 @@ import com.groundshop.groundshopapp.ui.parser.OrderParser;
 
 import java.util.List;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Application;
 import android.app.AlertDialog;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 
 import com.groundshop.groundshopapp.ui.orderDao;
@@ -20,10 +28,12 @@ import com.groundshop.groundshopapp.ui.OrderDatabase;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import com.groundshop.groundshopapp.R;
+
 import androidx.annotation.NonNull;
 
-import android.app.Application;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -32,21 +42,24 @@ import android.widget.TextView;
 
 import java.net.HttpURLConnection;
 
-
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NotificationsViewModel extends AndroidViewModel {
     private LiveData<List<Order>> mOrders;
     private String auth = null;
     private final orderDao orderDao;
     private Activity activity;
+    private final Application application;
+    private Timer timer;
 
     public void setActivity(Activity activity) {
         this.activity = activity;
     }
 
-
     public NotificationsViewModel(@NonNull Application application) {
         super(application);
+        this.application = application;
 
         OrderDatabase database = OrderDatabase.getInstance(application);
         orderDao = database.orderDao();
@@ -65,13 +78,16 @@ public class NotificationsViewModel extends AndroidViewModel {
         auth = auth.trim();
 
         loadOrdersFromServer();
+        startTimer();
     }
 
     private void loadOrdersFromServer() {
         new HttpRequestTask(auth).execute("https://groundshop.by/api/route");
     }
 
-    public LiveData<List<Order>> getOrders() { return mOrders; }
+    public LiveData<List<Order>> getOrders() {
+        return mOrders;
+    }
 
     public void removeOrder(Order order) {
         new RemoveOrderAsyncTask(orderDao).execute(order);
@@ -107,7 +123,6 @@ public class NotificationsViewModel extends AndroidViewModel {
             if (urls.length < 1 || urls[0] == null) {
                 return null;
             }
-
             return HttpRequestHelper.sendGetRequest(urls[0], auth);
         }
 
@@ -116,21 +131,46 @@ public class NotificationsViewModel extends AndroidViewModel {
             if (resultAndStatus != null && resultAndStatus.length == 2) {
                 String result = resultAndStatus[0];
                 int status = Integer.parseInt(resultAndStatus[1]);
-
+                showNotification();
                 if (status == HttpURLConnection.HTTP_OK) {
                     List<Order> parsedOrders = new OrderParser().parseOrders(result);
                     mOrders = orderDao.getOrders();
+                    if (!parsedOrders.isEmpty()) {
+                        showNotification();
+                    }
                     new InsertOrdersAsyncTask(orderDao).execute(parsedOrders);
                 } else if (status == HttpURLConnection.HTTP_UNAUTHORIZED) {
                     openDialog("Неудалось авторизировать");
                 } else if (status == HttpURLConnection.HTTP_NO_CONTENT) {
                     openDialog("Нет новых заказов");
-                }else {
+                } else {
                     openDialog("Ошибка получения заказов");
                 }
             }
         }
     }
+
+    private void showNotification() {
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(application);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "OrdersNotifications";
+            NotificationChannel channel = new NotificationChannel("123", name, NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(application, "123")
+                .setSmallIcon(R.drawable.icon_notifications)
+                .setContentTitle("Поступил новый заказ!")
+                .setSubText ("Поступил новый заказ!");
+
+        if (ActivityCompat.checkSelfPermission(application.getApplicationContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            notificationManager.notify(123, builder.build());
+        }
+    }
+
+
     public void openDialog(String title) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         View customView = LayoutInflater.from(activity).inflate(R.layout.alert_window, null);
@@ -172,5 +212,14 @@ public class NotificationsViewModel extends AndroidViewModel {
             }
             return null;
         }
+    }
+    private void startTimer() {
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                loadOrdersFromServer();
+            }
+        }, 0, 60000);
     }
 }
