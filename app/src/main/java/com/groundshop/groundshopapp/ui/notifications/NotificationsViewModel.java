@@ -131,7 +131,6 @@ public class NotificationsViewModel extends AndroidViewModel {
             if (resultAndStatus != null && resultAndStatus.length == 2) {
                 String result = resultAndStatus[0];
                 int status = Integer.parseInt(resultAndStatus[1]);
-                showNotification();
                 if (status == HttpURLConnection.HTTP_OK) {
                     List<Order> parsedOrders = new OrderParser().parseOrders(result);
                     mOrders = orderDao.getOrders();
