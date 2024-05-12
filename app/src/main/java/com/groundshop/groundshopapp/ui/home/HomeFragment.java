@@ -3,9 +3,10 @@ package com.groundshop.groundshopapp.ui.home;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -104,7 +105,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadPricesFromServer() {
-        new GetRequestTask(auth).execute("https://groundshop.by/api/prices");
+        if (isNetworkAvailable()) {
+            new GetRequestTask(auth).execute("https://groundshop.by/api/prices");
+        } else {
+            openDialog("Отсутствует подключение к сети");
+        }
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -117,9 +122,11 @@ public class HomeFragment extends Fragment {
 
         @Override
         protected String[] doInBackground(String... urls) {
-            if (urls.length < 1 || urls[0] == null) {
+            if (urls.length < 1 || urls[0] == null || !isNetworkAvailable()) {
+                openDialog("Ошибка получения цен");
                 return null;
             }
+
             return HttpRequestHelper.sendGetRequest(urls[0], auth);
         }
 
@@ -144,10 +151,8 @@ public class HomeFragment extends Fragment {
                             }
                         }
                     }
-                }else {
-                    openDialog("Ошибка получения цен с сайта");
-                }
-            }
+                }else { openDialog("Ошибка получения цен с сайта"); }
+            }else { openDialog("Ошибка подключения к сайту"); }
         }
 
     }
@@ -166,6 +171,94 @@ public class HomeFragment extends Fragment {
             e.printStackTrace();
         }
         return pricesMap;
+    }
+
+
+    private void showProductDetailsDialog(int index, String productName, TextView productPriceView) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View customLayout = getLayoutInflater().inflate(R.layout.change_price_window, null);
+        builder.setView(customLayout);
+
+        TextView dialogTitle = customLayout.findViewById(R.id.changePriceTitle);
+        EditText dialogInput = customLayout.findViewById(R.id.changePriceInput);
+        Button closeButton = customLayout.findViewById(R.id.closeButton);
+        Button setButton = customLayout.findViewById(R.id.setButton);
+
+        String volume = dataBase.getProductVolumeById(index);
+        String Price = dataBase.getProductPriceById(index);
+
+        dialogInput.setText(Price);
+        dialogTitle.setText(productName+" ("+volume+")");
+
+        AlertDialog dialog = builder.create();
+
+        dialog.show();
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(R.drawable.change_price_background);
+        }
+
+        setButton.setOnClickListener(v -> {
+            String newPrice = dialogInput.getText().toString();
+
+            if (!newPrice.isEmpty()) {
+                if (isNetworkAvailable()) {
+                    new PostRequestTask(auth, index, newPrice, productPriceView).execute("https://groundshop.by/api/prices");
+                } else {
+                    openDialog("Отсутствует подключение к сети");
+                }
+            } else {
+                openDialog("Введите цену");
+            }
+            dialog.dismiss();
+        });
+
+        closeButton.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class PostRequestTask extends AsyncTask<String, Void, String> {
+        private final String auth;
+        private final int index;
+        private final String newPrice;
+        private final TextView productPriceView;
+
+        public PostRequestTask(String auth, int index, String newPrice, TextView productPriceView) {
+            this.auth = auth;
+            this.index = index;
+            this.newPrice = newPrice;
+            this.productPriceView = productPriceView;
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+            if (urls.length < 1 || urls[0] == null || !isNetworkAvailable()) {
+                openDialog("Ошибка отправки цены");
+                return null;
+            }
+            String jsonData = "{\"" + index + "\": \"" + newPrice + "\"}";
+            return HttpRequestHelper.sendPostRequest(urls[0], auth, jsonData);
+        }
+
+        @Override
+        protected void onPostExecute(String Status) {
+            if (Status != null) {
+                int status = Integer.parseInt(Status);
+
+                if (status == HttpURLConnection.HTTP_OK) {
+                    dataBase.updateProductPrice(index, newPrice);
+                    openDialog("Цена обновлена");
+                    productPriceView.setText(newPrice + " руб.");
+                } else {
+                    openDialog("Ошибка отправки цены");
+                }
+            } else {
+                openDialog("Сервер недоступен");
+            }
+        }
     }
 
     public void openDialog(String title) {
@@ -194,88 +287,10 @@ public class HomeFragment extends Fragment {
         dialog.show();
     }
 
-    private void showProductDetailsDialog(int index, String productName, TextView productPriceView) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        View customLayout = getLayoutInflater().inflate(R.layout.change_price_window, null);
-        builder.setView(customLayout);
-
-        TextView dialogTitle = customLayout.findViewById(R.id.changePriceTitle);
-        EditText dialogInput = customLayout.findViewById(R.id.changePriceInput);
-        Button closeButton = customLayout.findViewById(R.id.closeButton);
-        Button setButton = customLayout.findViewById(R.id.setButton);
-
-        String volume = dataBase.getProductVolumeById(index);
-        String Price = dataBase.getProductPriceById(index);
-
-        dialogInput.setText(Price);
-        dialogTitle.setText(productName+" ("+volume+")");
-
-        AlertDialog dialog = builder.create();
-
-        dialog.show();
-
-        Window window = dialog.getWindow();
-        if (window != null) {
-            window.setBackgroundDrawableResource(R.drawable.change_price_background);
-        }
-
-        // TODO: POST Request
-        setButton.setOnClickListener(v -> {
-            String newPrice = dialogInput.getText().toString();
-
-            if (!newPrice.isEmpty()) {
-                new PostRequestTask(auth, index, newPrice, productPriceView).execute("https://groundshop.by/api/prices");
-            } else {
-                Log.d("SetButton", "New price is empty");
-            }
-
-            dialog.dismiss();
-        });
-
-        closeButton.setOnClickListener(v -> {
-            dialog.dismiss();
-        });
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private class PostRequestTask extends AsyncTask<String, Void, String> {
-        private final String auth;
-        private final int index;
-        private final String newPrice;
-        private final TextView productPriceView;
-
-        public PostRequestTask(String auth, int index, String newPrice, TextView productPriceView) {
-            this.auth = auth;
-            this.index = index;
-            this.newPrice = newPrice;
-            this.productPriceView = productPriceView;
-        }
-
-        @Override
-        protected String doInBackground(String... urls) {
-            if (urls.length < 1 || urls[0] == null) {
-                return null;
-            }
-            String jsonData = "{\"" + index + "\": \"" + newPrice + "\"}";
-            return HttpRequestHelper.sendPostRequest(urls[0], auth, jsonData);
-        }
-
-        @Override
-        protected void onPostExecute(String Status) {
-            if (Status != null) {
-                int status = Integer.parseInt(Status);
-
-                if (status == HttpURLConnection.HTTP_OK) {
-                    dataBase.updateProductPrice(index, newPrice);
-                    openDialog("Цена обновлена");
-                    productPriceView.setText(newPrice + " руб.");
-                } else {
-                    openDialog("Ошибка отправки цены");
-                }
-            } else {
-                Log.e("PostRequestTask", "Status code is null");
-            }
-        }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     @Override
